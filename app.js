@@ -1,5 +1,4 @@
 const express = require("express");
-const passport = require("passport");
 var auth = require("./routes/auth");
 require("./passport");
 const graphqlHTTP = require("express-graphql");
@@ -25,7 +24,7 @@ mongoose.connect(
     useNewUrlParser: true
   }
 );
-console.log("a");
+
 mongoose.connection.once("open", () => {
   console.log("Connected to database");
 });
