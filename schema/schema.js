@@ -64,10 +64,6 @@ const RootQuery = new GraphQLObjectType({
       type: UserType, // O tipo que retorna
       args: { id: { type: GraphQLID } }, // O que vai usar pra buscar
       resolve(parent, args) {
-        // parent = relacionamento
-        // Onde pego informações do bd
-        // return _.find(books, { id: args.id });
-
         return User.findById(Types.ObjectId(args.id));
       }
     },
@@ -75,7 +71,6 @@ const RootQuery = new GraphQLObjectType({
       type: DietType,
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
-        // return _.find(authors, { id: args.id });
         return Diet.findById(Types.ObjectId(args.id));
       }
     },
