@@ -26,6 +26,7 @@ const UserType = new GraphQLObjectType({
     id: { type: GraphQLID },
     name: { type: GraphQLString },
     password: { type: GraphQLString },
+    email: { type: GraphQLString },
     diets: {
       type: new GraphQLList(DietType),
       async resolve(parent, args) {
@@ -90,12 +91,14 @@ const Mutations = new GraphQLObjectType({
       type: UserType,
       args: {
         name: { type: new GraphQLNonNull(GraphQLString) },
-        password: { type: new GraphQLNonNull(GraphQLString) }
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        email: { type: new GraphQLNonNull(GraphQLString) }
       },
       resolve(parent, args) {
         let user = new User({
           name: args.name,
-          password: args.password
+          password: args.password,
+          email: args.email
         });
 
         return user.save();
