@@ -4,7 +4,6 @@
 // 3 - Define rootqueries
 
 // Rootquery = como o usuário entra no grafo e busca algo
-const _ = require("lodash");
 const graphql = require("graphql");
 const {
   GraphQLNonNull,
@@ -27,6 +26,10 @@ const UserType = new GraphQLObjectType({
     name: { type: GraphQLString },
     password: { type: GraphQLString },
     email: { type: GraphQLString },
+    type: { type: GraphQLString },
+    doctor: {
+      type: GraphQLID
+    },
     diets: {
       type: new GraphQLList(DietType),
       async resolve(parent, args) {
@@ -77,10 +80,18 @@ const RootQuery = new GraphQLObjectType({
     },
     users: {
       type: GraphQLList(UserType),
+      args: { doctor: { type: GraphQLID }},
       resolve(parent, args) {
-        return User.find({});
+        const { doctor } = args;
+        const query = {};
+
+        if (doctor)
+          query.doctor = Types.ObjectId(doctor);
+          console.log(query);
+          
+        return User.find(query);
       }
-    }
+    },
   }
 });
 
@@ -92,13 +103,19 @@ const Mutations = new GraphQLObjectType({
       args: {
         name: { type: new GraphQLNonNull(GraphQLString) },
         password: { type: new GraphQLNonNull(GraphQLString) },
-        email: { type: new GraphQLNonNull(GraphQLString) }
+        email: { type: new GraphQLNonNull(GraphQLString) },
+        type: { type: new GraphQLNonNull(GraphQLString) },
+        doctor: { type: GraphQLID}
       },
       resolve(parent, args) {
+
+        console.log({args});
         let user = new User({
           name: args.name,
           password: args.password,
-          email: args.email
+          email: args.email,
+          type: args.type,
+          doctor: args.doctor ? Types.ObjectId(args.doctor) : null
         });
 
         return user.save();
