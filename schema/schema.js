@@ -45,6 +45,7 @@ const DietType = new GraphQLObjectType({
   name: "Diet",
   fields: () => ({
     id: { type: GraphQLID },
+    name: { type: GraphQLString },
     createdAt: { type: GraphQLString },
     user: { type: GraphQLID }
   })
