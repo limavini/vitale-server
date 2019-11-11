@@ -14,6 +14,7 @@ const {
   GraphQLSchema
 } = graphql;
 const { Types } = require("mongoose");
+const parse = require("date-fns/parse");
 const User = require("../models/user");
 const Meal = require("../models/meal");
 const Diet = require("../models/diet");
@@ -50,7 +51,7 @@ const DietType = new GraphQLObjectType({
     meals: {
       type: GraphQLList(MealType),
       async resolve(parent, args) {
-        const meal = await Meal.find({ diet: parent.id });
+        const meal = await Meal.find({ diet: parent.id }).sort({schedule: 1});
 
         return meal;
       }
@@ -94,7 +95,6 @@ const RootQuery = new GraphQLObjectType({
         const query = {};
 
         if (doctor) query.doctor = Types.ObjectId(doctor);
-        console.log(query);
 
         return User.find(query);
       }
@@ -146,18 +146,22 @@ const Mutations = new GraphQLObjectType({
     addMeal: {
       type: MealType,
       args: {
+        name: { type: new GraphQLNonNull(GraphQLString)},
         diet: { type: new GraphQLNonNull(GraphQLID) },
         foods: { type: new GraphQLList(GraphQLString) },
         schedule: { type: new GraphQLNonNull(GraphQLString) }
       },
-      resolve(_, { diet, foods, schedule }) {
+      resolve(_, { diet, foods, schedule, name }) {
+        schedule = parse(schedule, "HH:mm", new Date());
+
         let meal = new Meal({
           diet: Types.ObjectId(diet),
           foods,
-          schedule
+          schedule,
+          name
         });
 
-        meal.save();
+       return meal.save();
       }
     }
   }
