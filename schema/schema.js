@@ -65,6 +65,7 @@ const MealType = new GraphQLObjectType({
     id: { type: GraphQLID },
     schedule: { type: GraphQLString },
     foods: { type: GraphQLList(GraphQLString) },
+    name: { type: GraphQLString },
     diet: { type: GraphQLID }
   })
 });
