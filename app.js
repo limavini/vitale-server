@@ -21,7 +21,8 @@ app.use(cors());
 mongoose.connect(
   "mongodb+srv://admin:minhasenha1@cluster0-uatkq.mongodb.net/test?retryWrites=true&w=majority",
   {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true
   }
 );
 

@@ -9,7 +9,6 @@ const {
   GraphQLNonNull,
   GraphQLList,
   GraphQLID,
-  GraphQLInt,
   GraphQLObjectType,
   GraphQLString,
   GraphQLSchema
@@ -47,7 +46,15 @@ const DietType = new GraphQLObjectType({
     id: { type: GraphQLID },
     name: { type: GraphQLString },
     createdAt: { type: GraphQLString },
-    user: { type: GraphQLID }
+    user: { type: GraphQLID },
+    meals: {
+      type: GraphQLList(MealType),
+      async resolve(parent, args) {
+        const meal = await Meal.find({ diet: parent.id });
+
+        return meal;
+      }
+    }
   })
 });
 
@@ -81,18 +88,17 @@ const RootQuery = new GraphQLObjectType({
     },
     users: {
       type: GraphQLList(UserType),
-      args: { doctor: { type: GraphQLID }},
+      args: { doctor: { type: GraphQLID } },
       resolve(parent, args) {
         const { doctor } = args;
         const query = {};
 
-        if (doctor)
-          query.doctor = Types.ObjectId(doctor);
-          console.log(query);
-          
+        if (doctor) query.doctor = Types.ObjectId(doctor);
+        console.log(query);
+
         return User.find(query);
       }
-    },
+    }
   }
 });
 
@@ -106,11 +112,9 @@ const Mutations = new GraphQLObjectType({
         password: { type: new GraphQLNonNull(GraphQLString) },
         email: { type: new GraphQLNonNull(GraphQLString) },
         type: { type: new GraphQLNonNull(GraphQLString) },
-        doctor: { type: GraphQLID}
+        doctor: { type: GraphQLID }
       },
-      resolve(parent, args) {
-
-        console.log({args});
+      resolve(_, args) {
         let user = new User({
           name: args.name,
           password: args.password,
@@ -129,7 +133,7 @@ const Mutations = new GraphQLObjectType({
         user: { type: new GraphQLNonNull(GraphQLID) },
         name: { type: new GraphQLNonNull(GraphQLString) }
       },
-      resolve(parent, args) {
+      resolve(_, args) {
         let diet = new Diet({
           name: args.name,
           user: Types.ObjectId(args.user)
@@ -146,7 +150,7 @@ const Mutations = new GraphQLObjectType({
         foods: { type: new GraphQLList(GraphQLString) },
         schedule: { type: new GraphQLNonNull(GraphQLString) }
       },
-      resolve(parent, { diet, foods, schedule }) {
+      resolve(_, { diet, foods, schedule }) {
         let meal = new Meal({
           diet: Types.ObjectId(diet),
           foods,
