@@ -164,6 +164,16 @@ const Mutations = new GraphQLObjectType({
 
        return meal.save();
       }
+    },
+
+    removeMeal: {
+      type: MealType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID)}
+      },
+      async resolve(_, {id}) {
+        return Meal.remove({_id: Types.ObjectId(id)});
+      }
     }
   }
 });
