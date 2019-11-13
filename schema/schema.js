@@ -15,6 +15,7 @@ const {
 } = graphql;
 const { Types } = require("mongoose");
 const parse = require("date-fns/parse");
+const set = require("date-fns/set");
 const User = require("../models/user");
 const Meal = require("../models/meal");
 const Diet = require("../models/diet");
@@ -154,7 +155,7 @@ const Mutations = new GraphQLObjectType({
       },
       resolve(_, { diet, foods, schedule, name }) {
         schedule = parse(schedule, "HH:mm", new Date());
-
+        schedule = set(schedule, { year: 2019, month: 2, date: 3});
         let meal = new Meal({
           diet: Types.ObjectId(diet),
           foods,
