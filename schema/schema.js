@@ -145,6 +145,27 @@ const Mutations = new GraphQLObjectType({
       }
     },
 
+    editDiet: {
+      type: DietType,
+      args: {
+        name: { type: new GraphQLNonNull(GraphQLString)},
+        diet: { type: new GraphQLNonNull(GraphQLID)}
+      },
+      resolve(_, args) {
+        return Diet.findByIdAndUpdate(Types.ObjectId(args.diet), { name: args.name });
+      }
+    },
+
+    removeDiet: {
+      type: DietType,
+      args: {
+        diet: { type: new GraphQLNonNull(GraphQLID)},
+      },
+      resolve(_, args) {
+        return Diet.findByIdAndDelete(Types.ObjectId(args.diet));
+      }
+    },
+
     addMeal: {
       type: MealType,
       args: {
