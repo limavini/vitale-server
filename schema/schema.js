@@ -11,6 +11,7 @@ const {
   GraphQLID,
   GraphQLObjectType,
   GraphQLString,
+  GraphQLInt,
   GraphQLSchema
 } = graphql;
 const { Types } = require("mongoose");
@@ -19,6 +20,18 @@ const set = require("date-fns/set");
 const User = require("../models/user");
 const Meal = require("../models/meal");
 const Diet = require("../models/diet");
+const Measure = require("../models/measure");
+
+const MeasureType = new GraphQLObjectType({
+  name: "Measure",
+  fields: () => ({
+    id: { type: GraphQLID },
+    user: { type: GraphQLID },
+    weight: { type: GraphqLInt },
+    height: { type: GraphqLInt },
+    waist: { type: GraphqLInt }
+  })
+});
 
 const UserType = new GraphQLObjectType({
   name: "User",
@@ -35,7 +48,6 @@ const UserType = new GraphQLObjectType({
       type: new GraphQLList(DietType),
       async resolve(parent, args) {
         const res = await Diet.find({ user: parent._id });
-        console.log(res);
         return res;
       }
     }
@@ -52,7 +64,7 @@ const DietType = new GraphQLObjectType({
     meals: {
       type: GraphQLList(MealType),
       async resolve(parent, args) {
-        const meal = await Meal.find({ diet: parent.id }).sort({schedule: 1});
+        const meal = await Meal.find({ diet: parent.id }).sort({ schedule: 1 });
 
         return meal;
       }
@@ -78,27 +90,34 @@ const RootQuery = new GraphQLObjectType({
     user: {
       type: UserType, // O tipo que retorna
       args: { id: { type: GraphQLID } }, // O que vai usar pra buscar
-      resolve(parent, args) {
+      resolve(_, args) {
         return User.findById(Types.ObjectId(args.id));
       }
     },
     diet: {
       type: DietType,
       args: { id: { type: GraphQLID } },
-      resolve(parent, args) {
+      resolve(_, args) {
         return Diet.findById(Types.ObjectId(args.id));
       }
     },
     users: {
       type: GraphQLList(UserType),
       args: { doctor: { type: GraphQLID } },
-      resolve(parent, args) {
+      resolve(_, args) {
         const { doctor } = args;
         const query = {};
 
         if (doctor) query.doctor = Types.ObjectId(doctor);
 
         return User.find(query);
+      }
+    },
+    measures: {
+      type: GraphQLList(MeasureType),
+      args: { user: { type: GraphQLID } },
+      resolve(_, args) {
+        return Measure.find({ user: Types.ObjectId(args.user) });
       }
     }
   }
@@ -148,18 +167,20 @@ const Mutations = new GraphQLObjectType({
     editDiet: {
       type: DietType,
       args: {
-        name: { type: new GraphQLNonNull(GraphQLString)},
-        diet: { type: new GraphQLNonNull(GraphQLID)}
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        diet: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(_, args) {
-        return Diet.findByIdAndUpdate(Types.ObjectId(args.diet), { name: args.name });
+        return Diet.findByIdAndUpdate(Types.ObjectId(args.diet), {
+          name: args.name
+        });
       }
     },
 
     removeDiet: {
       type: DietType,
       args: {
-        diet: { type: new GraphQLNonNull(GraphQLID)},
+        diet: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve(_, args) {
         return Diet.findByIdAndDelete(Types.ObjectId(args.diet));
@@ -169,14 +190,14 @@ const Mutations = new GraphQLObjectType({
     addMeal: {
       type: MealType,
       args: {
-        name: { type: new GraphQLNonNull(GraphQLString)},
+        name: { type: new GraphQLNonNull(GraphQLString) },
         diet: { type: new GraphQLNonNull(GraphQLID) },
         foods: { type: new GraphQLList(GraphQLString) },
         schedule: { type: new GraphQLNonNull(GraphQLString) }
       },
       resolve(_, { diet, foods, schedule, name }) {
         schedule = parse(schedule, "HH:mm", new Date());
-        schedule = set(schedule, { year: 2019, month: 2, date: 3});
+        schedule = set(schedule, { year: 2019, month: 2, date: 3 });
         let meal = new Meal({
           diet: Types.ObjectId(diet),
           foods,
@@ -184,17 +205,47 @@ const Mutations = new GraphQLObjectType({
           name
         });
 
-       return meal.save();
+        return meal.save();
       }
     },
 
     removeMeal: {
       type: MealType,
       args: {
-        id: { type: new GraphQLNonNull(GraphQLID)}
+        id: { type: new GraphQLNonNull(GraphQLID) }
       },
-      async resolve(_, {id}) {
-        return Meal.remove({_id: Types.ObjectId(id)});
+      async resolve(_, { id }) {
+        return Meal.remove({ _id: Types.ObjectId(id) });
+      }
+    },
+
+    addMeasure: {
+      type: MeasureType,
+      args: {
+        user: { type: new GraphQLNonNull(GraphQLID) },
+        height: { type: new GraphQLNonNull(GraphQLInt) },
+        weight: { type: new GraphQLNonNull(GraphQLInt) },
+        waist: { type: new GraphQLNonNull(GraphQLInt) }
+      },
+      resolve(_, { user, height, weight, waist }) {
+        let measure = new Measure({
+          user,
+          height,
+          weight,
+          waist
+        });
+
+        return measure.save();
+      }
+    },
+
+    removeMeasure: {
+      type: MeasureType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve(_, { id }) {
+        return Measure.findByIdAndDelete(Types.ObjectId(id));
       }
     }
   }
