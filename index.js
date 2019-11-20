@@ -19,7 +19,7 @@ app.use(cors());
 
 // ADICIONAR ENV
 mongoose.connect(
-  "mongodb+srv://admin:minhasenha1@cluster0-uatkq.mongodb.net/test?retryWrites=true&w=majority",
+  "mongodb+srv://admin:vitale123@cluster0-uatkq.mongodb.net/test?retryWrites=true&w=majority",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
