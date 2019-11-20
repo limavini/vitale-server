@@ -6,6 +6,7 @@ const schema = require("./schema/schema");
 const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 const cors = require("cors");
+require('dotenv').config();
 
 const app = express();
 app.use(
@@ -45,5 +46,5 @@ app.use(
 // Usando nodemon para manter o server atualizando
 // npm i -g nodemon
 app.listen(4000, () => {
-  console.log("Now listening for requests on port 4000");
+  console.log("Now listening for requests on port " + process.env.PORT || 4000);
 });
