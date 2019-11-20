@@ -26,10 +26,12 @@ const MeasureType = new GraphQLObjectType({
   name: "Measure",
   fields: () => ({
     id: { type: GraphQLID },
-    user: { type: GraphQLID },
-    weight: { type: GraphqLInt },
-    height: { type: GraphqLInt },
-    waist: { type: GraphqLInt }
+    user: { type: UserType },
+    weight: { type: GraphQLInt },
+    height: { type: GraphQLInt },
+    waist: { type: GraphQLInt },
+    hip: { type: GraphQLInt },
+    createdAt: { type: GraphQLString }
   })
 });
 
@@ -41,6 +43,7 @@ const UserType = new GraphQLObjectType({
     password: { type: GraphQLString },
     email: { type: GraphQLString },
     type: { type: GraphQLString },
+    crn: { type: GraphQLString },
     doctor: {
       type: GraphQLID
     },
@@ -48,6 +51,15 @@ const UserType = new GraphQLObjectType({
       type: new GraphQLList(DietType),
       async resolve(parent, args) {
         const res = await Diet.find({ user: parent._id });
+        return res;
+      }
+    },
+    measures: {
+      type: new GraphQLList(MeasureType),
+      async resolve(parent, _) {
+        const res = await Measure.find({ user: parent._id }).sort({
+          createdAt: -1
+        });
         return res;
       }
     }
@@ -89,9 +101,16 @@ const RootQuery = new GraphQLObjectType({
   fields: {
     user: {
       type: UserType, // O tipo que retorna
-      args: { id: { type: GraphQLID } }, // O que vai usar pra buscar
-      resolve(_, args) {
-        return User.findById(Types.ObjectId(args.id));
+      args: { id: { type: GraphQLID }, email: { type: GraphQLString } }, // O que vai usar pra buscar
+      async resolve(_, args) {
+        const query = {};
+
+        if (args.id) query._id = Types.ObjectId(args.id);
+
+        if (args.email) query.email = args.email;
+
+        const user = await User.findOne(query);
+        return user;
       }
     },
     diet: {
@@ -133,18 +152,36 @@ const Mutations = new GraphQLObjectType({
         password: { type: new GraphQLNonNull(GraphQLString) },
         email: { type: new GraphQLNonNull(GraphQLString) },
         type: { type: new GraphQLNonNull(GraphQLString) },
+        crn: { type: GraphQLString },
         doctor: { type: GraphQLID }
       },
       resolve(_, args) {
-        let user = new User({
-          name: args.name,
-          password: args.password,
-          email: args.email,
-          type: args.type,
-          doctor: args.doctor ? Types.ObjectId(args.doctor) : null
-        });
+        try {
+          let user = new User({
+            name: args.name,
+            password: args.password,
+            email: args.email,
+            type: args.type,
+            crn: args.crn ? args.crn : null,
+            doctor: args.doctor ? Types.ObjectId(args.doctor) : null
+          });
 
-        return user.save();
+          return user.save();
+        } catch (err) {
+          console.log({ err });
+        }
+      }
+    },
+
+    removeUser: {
+      type: UserType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve(_, args) {
+        return User.findByIdAndDelete(Types.ObjectId(args.id));
       }
     },
 
@@ -225,7 +262,8 @@ const Mutations = new GraphQLObjectType({
         user: { type: new GraphQLNonNull(GraphQLID) },
         height: { type: new GraphQLNonNull(GraphQLInt) },
         weight: { type: new GraphQLNonNull(GraphQLInt) },
-        waist: { type: new GraphQLNonNull(GraphQLInt) }
+        waist: { type: new GraphQLNonNull(GraphQLInt) },
+        hip: { type: new GraphQLNonNull(GraphQLInt) }
       },
       resolve(_, { user, height, weight, waist }) {
         let measure = new Measure({

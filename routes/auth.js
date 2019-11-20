@@ -15,6 +15,7 @@ router.post("/", (req, res) => {
 router.post("/login", function(req, res) {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err || !user) {
+      console.log({err, user});
       return res.status(400).json({
         message: info ? info.message : "Login failed",
         user: user
