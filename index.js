@@ -1,12 +1,12 @@
 const express = require("express");
-// var auth = require("./routes/auth");
-// require("./passport");
-// const graphqlHTTP = require("express-graphql");
-// const schema = require("./schema/schema");
-// const mongoose = require("mongoose");
-// var bodyParser = require("body-parser");
-// const cors = require("cors");
-//require('dotenv').config();
+var auth = require("./routes/auth");
+require("./passport");
+const graphqlHTTP = require("express-graphql");
+const schema = require("./schema/schema");
+const mongoose = require("mongoose");
+var bodyParser = require("body-parser");
+const cors = require("cors");
+require('dotenv').config();
 
 const app = express();
 // const port = process.env.PORT || 8080;
