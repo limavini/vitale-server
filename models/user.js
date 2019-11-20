@@ -5,7 +5,8 @@ const userSchema = new Schema({
   email: String,
   password: String,
   type: String,
+  crn: String,
   doctor: { type: Schema.Types.ObjectId, ref: "User" },
-}, { timestamps: true });
+});
 
 module.exports = mongoose.model("User", userSchema);

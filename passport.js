@@ -11,21 +11,35 @@ passport.use(
       usernameField: "email",
       passwordField: "password"
     },
-    function(email, password, cb) {
+    async function(email, password, cb) {
       //Assume there is a DB module pproviding a global UserModel
-      return User.findOne({ name: email, password })
-        .then(user => {
-          if (!user) {
-            return cb(null, false, { message: "Incorrect email or password." });
-          }
+      try {
+        const loggedUser = await User.findOne({ email, password });
 
-          return cb(null, user, {
+        if (!loggedUser) {
+          return cb(null, false, { message: "Email ou senha incorretos." });
+        } else {
+          return cb(null, loggedUser, {
             message: "Logged In Successfully"
           });
-        })
-        .catch(err => {
-          return cb(err);
-        });
+        }
+      } catch (err) {
+        console.log({ err });
+      }
+      // .then(user => {
+      //   if (!user) {
+      // return cb(null, false, { message: "Email ou senha incorretos." });
+      //   }
+
+      // return cb(null, user, {
+      //   message: "Logged In Successfully"
+      // });
+      // })
+      // .catch(err => {
+      //   return cb(err);
+      // });
+
+      //return loggedUser;
     }
   )
 );
