@@ -270,7 +270,8 @@ const Mutations = new GraphQLObjectType({
           user,
           height,
           weight,
-          waist
+          waist,
+          hip
         });
 
         return measure.save();
