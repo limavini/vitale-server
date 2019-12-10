@@ -265,7 +265,7 @@ const Mutations = new GraphQLObjectType({
         waist: { type: new GraphQLNonNull(GraphQLInt) },
         hip: { type: new GraphQLNonNull(GraphQLInt) }
       },
-      resolve(_, { user, height, weight, waist }) {
+      resolve(_, { user, height, weight, waist, hip }) {
         let measure = new Measure({
           user,
           height,
